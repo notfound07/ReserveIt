@@ -3,6 +3,7 @@ import './Style.css';
 import axios from 'axios';
 import { useState } from 'react';
 import logo from '../assets/key_2.webp';
+import SignUpApi from '../apis/SignUpApi';
 function Register() {
     const navigate = useNavigate();
 
@@ -16,7 +17,7 @@ function Register() {
         e.preventDefault();
         try {
             // Make an API request to create a new user
-            const response = await axios.post("http://localhost:3500/user/signup", {
+            const response = await SignUpApi.post("/", {
                 name,
                 username,
                 email,

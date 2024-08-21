@@ -4,6 +4,7 @@ import moment from 'moment';
 import './adminpage.css';
 import Select from 'react-select';
 import Adminnavbar from './Adminnavbar';
+import DataFinder from '../apis/DataFinder';
 function Adminpage() {
   const [entries, setEntries] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -15,7 +16,7 @@ function Adminpage() {
   useEffect(() => {
     const fetchAllResponses = async () => {
       try {
-        const response = await axios.get("http://localhost:3500/user/Allrecords");
+        const response = await DataFinder.get("/");
         if (response.status === 200) {
           // Return the array of feedback responses
           setEntries(response.data);

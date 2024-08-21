@@ -3,6 +3,7 @@ import { useContext, useState } from 'react';
 import { RecoveryContext } from "../App";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ResetPasswordApi from '../apis/ResetPasswordApi';
 
 
 const Reset = () => {
@@ -17,8 +18,8 @@ const Reset = () => {
         e.preventDefault();
         try {
             // Make an API request to create a new user
-            const response = await axios.post(
-                "http://localhost:3500/user/reset_password",
+            const response = await ResetPasswordApi.post(
+                "/",
                 {
                     email,
                     password,

@@ -5,6 +5,7 @@ import './Contact.css';
 import moment from 'moment';
 import axios from 'axios';
 import { useState } from 'react';
+import FeedbackApi from '../apis/FeedbackApi';
 
 function Contact() {
   const [records, setRecords] = useState([]);
@@ -17,7 +18,7 @@ function Contact() {
 
     try {
       // Make an API request to create a new user feedback
-      const response = await axios.post("http://localhost:3500/user/feedback", {
+      const response = await FeedbackApi.post("/", {
         name,
         email,
         msg,

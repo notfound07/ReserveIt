@@ -8,6 +8,7 @@ import 'react-calendar/dist/Calendar.css';
 import { useParams, useNavigate, NavLink } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../user/AuthContext';
+import DataFinder from '../apis/DataFinder';
 
 var totalseats = 52;
 var totalno;
@@ -117,7 +118,7 @@ function Sandoz() {
 
   const fetchAllResponses = async () => {
     try {
-      const response = await axios.get("http://localhost:3500/user/Allrecords");
+      const response = await DataFinder.get("/");
       if (response.status === 200) {
         // Return the array of feedback responses
         setEntries(response.data);

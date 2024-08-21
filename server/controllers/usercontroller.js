@@ -18,7 +18,7 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.query;
 
-        //validating if the email and the password exist.
+        // Validating if the email and the password exist
         if (!email) {
             return res.status(400).json({ message: "Email is required" });
         }
@@ -26,30 +26,35 @@ const login = async (req, res) => {
         if (!password) {
             return res.status(400).json({ message: "Password is required" });
         }
+
         if (!validator.isEmail(email)) {
             return res.status(400).json({ message: "Invalid email format" });
         }
 
-        // finding user for the given email.
+        // Finding user for the given email
         const user = await User.findOne({ email: email });
 
         if (!user) {
             return res.status(401).json({ message: "No user found for this email" });
         }
-        //comparing the password
+
+        // Comparing the password
         const isMatched = await bcrypt.compare(password, user.password);
         if (!isMatched) {
             return res.status(401).json({ message: "Incorrect Password" });
         }
+
         const token = jwt.sign({ email: user.email, id: user.id }, "test", { expiresIn: "1h" });
-        res.status(200).json({ result: user, token })
-        return res.status(200).json(user);
-    }
-    catch (err) {
+
+        // Sending the response with the user data and the token
+        return res.status(200).json({ result: user, token });
+
+    } catch (err) {
         console.log(err);
-        return res.status(500);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 reset_password = async (req, res) => {
     const { email, password, confirmpassword } = req.body;

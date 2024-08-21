@@ -6,6 +6,8 @@ import { useAuth } from './AuthContext';
 import logo from '../assets/key_1.webp';
 import { useContext } from 'react';
 import { RecoveryContext } from '../App';
+import LoginApi from '../apis/LoginApi';
+import RecoveryEmailApi from '../apis/RecoveryEmailApi';
 function Login() {
   const { setEmail, email, setOTP } = useContext(RecoveryContext);
   const [password, setPassword] = useState("");
@@ -14,45 +16,37 @@ function Login() {
   const navigate = useNavigate();
 
   async function submit(e) {
-    e.preventDefault();
-    if (!email) {
-      alert("Email is required");
-      return;
-    }
-    if (!password) {
-      alert("Password is required");
-      return;
-    }
-    if (email === "restaurant@gmail.com" && password === "0987654321") {
+    e.preventDefault(); 
+    if (email==="restaurant@gmail.com" && password==="0987654321"){
       navigate('/Adminpage');
     }
-    else {
-      try {
-        const res = await axios.get("http://localhost:3500/user/login", {
-          params: {
-            email,
-            password,
-          },
-        });
+    else{
+    try {
+      const res = await LoginApi.get("/", {
+        params: {
+          email,
+          password,
+        },
+      });
 
-        if (res.status === 200) {
-          const { token } = res.data;
-          login(token); // Pass the token to the login function
-          navigate("/Home");
-          localStorage.setItem(1, email);
-        }
-      } catch (err) {
-        if (err.response && err.response.status === 400) {
-          alert(err.response.data.message); // Display specific error messages from the server
-        } else if (err.response && err.response.status === 401) {
-          alert(err.response.data.message);
-        } else if (err.response && err.response.status === 500) {
-          alert("Something went wrong");
-        } else {
-          alert("An unexpected error occurred");
-        }
+      if (res.status === 200) {
+        const { token } = res.data;
+        login(token); // Pass the token to the login function
+        navigate("/Home");
+      }
+    } catch (err) {
+      if (err.response && err.response.status === 400) {
+        alert(err.response.data.message); // Display specific error messages from the server
+      } else if (err.response && err.response.status === 401) {
+        alert(err.response.data.message);
+      } else if (err.response && err.response.status === 500) {
+        alert("Something went wrong");
+      } else {
+        alert("An unexpected error occurred");
       }
     }
+  }
+    localStorage.setItem(1, email);
   }
 
   function navigateToOtp() {
@@ -61,8 +55,8 @@ function Login() {
         const OTP = Math.floor(Math.random() * 9000 + 1000);
         console.log(OTP);
         setOTP(OTP);
-        axios
-          .post("http://localhost:3500/send_recovery_email", {
+        RecoveryEmailApi
+          .post("/", {
             OTP,
             recipient_email: email,
           })
