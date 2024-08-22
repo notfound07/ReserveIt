@@ -1,0 +1,82 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  transition: opacity 500ms;
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup {
+  margin: 70px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  width: 30%;
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.want {
+  font-size: x-large;
+  padding: 20px 0; /* Adjust padding as needed */
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.buttonIn {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+}
+
+
+
+.popup-close {
+  font-size: x-large;
+  color: red;
+  text-decoration: none;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.message {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.contact-input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.navigate-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.navigate-button {
+  margin-top: 20px;
+  width: auto;  /* Adjust width as needed */
+  background-color: #219ebc;
+  color: #ffffff;
+  padding: 15px;
+  font-size: medium;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 5px rgba(8, 7, 16, 0.6);
+}
+
+.navigate-button:hover {
+  background-color: #8ecae6;
+}
