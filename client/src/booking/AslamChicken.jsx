@@ -8,7 +8,7 @@ import 'react-calendar/dist/Calendar.css';
 import { useParams, useNavigate, NavLink } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../user/AuthContext';
-import DataFinder  from '../apis/DataFinder';
+import DataFinder from '../apis/DataFinder';
 
 var totalseats = 52;
 var totalno;
@@ -38,26 +38,24 @@ function AslamChicken() {
 
   const seatsubmit = () => {
     if (isLoggedIn) {
-        const result = window.confirm(`Do you Confirm ${seats} seats`);
-        if (result === true) {
-            totalno = totalseats - seats;
-            totalseats = totalno;
-            if (totalseats >= 0) {
-                navigate("/OrderPopup")
-            } else {
-                alert("Sorry,Booking is Full \n SEE YOU NEXT BYE");
-            }
-        }
-        localStorage.setItem("restraunt", restaurantName);
-        localStorage.setItem("branch name", bname);
-        localStorage.setItem("time", selectedValue);
-        localStorage.setItem("date", date);
-        localStorage.setItem("seats", seats);
+      let totalno = totalseats - seats;
+
+      if (totalno >= 0) {
+        // Update total seats and navigate
+        navigate("/OrderPopup");
+      } else {
+        alert("Sorry, Booking is Full \n SEE YOU NEXT TIME");
+      }
+      localStorage.setItem("restraunt", restaurantName);
+      localStorage.setItem("branch name", bname);
+      localStorage.setItem("time", selectedValue);
+      localStorage.setItem("date", date);
+      localStorage.setItem("seats", seats);
     } else {
-        // Handle case when user is not logged in, perhaps by prompting them to login
-        alert("Please login to confirm seats.");
+      // Handle case when user is not logged in, perhaps by prompting them to login
+      alert("Please login to confirm seats.");
     }
-}
+  }
 
   const onChange = (date) => {
     setDate(date);
@@ -86,21 +84,21 @@ function AslamChicken() {
     const isPM = hour >= 12;
     hour = hour % 12 || 12; // Converts 0 to 12 for midnight and handles PM conversion
     const showTime = `${hour}${isPM ? 'pm' : 'am'}`;
-    const selecteddate=new Date(date);
+    const selecteddate = new Date(date);
     let matchFound = false;
     const isSameDay = date_t.getFullYear() === selecteddate.getFullYear() &&
-                      date_t.getMonth() === selecteddate.getMonth() &&
-                      date_t.getDate() === selecteddate.getDate();
-    
-    if (isSameDay && showTime ) {
+      date_t.getMonth() === selecteddate.getMonth() &&
+      date_t.getDate() === selecteddate.getDate();
+
+    if (isSameDay && showTime) {
       const disabledSlots = [];
       for (let i = 0; i < timeSlots.length; i++) {
         const [start, end] = timeSlots[i].split('-');
-        const starts_time=start.trim() // Trim to remove any leading or trailing spaces
+        const starts_time = start.trim() // Trim to remove any leading or trailing spaces
         if (starts_time === showTime) {
           matchFound = true;
-           // Disable the matched slot and all previous slots
-           disabledSlots.push(...timeSlots.slice(0, i + 1));
+          // Disable the matched slot and all previous slots
+          disabledSlots.push(...timeSlots.slice(0, i + 1));
           break; // Exit loop once match is found
         }
       }
@@ -108,10 +106,10 @@ function AslamChicken() {
       }
       setDisabledSlots(disabledSlots);
     }
-      else {
-        setDisabledSlots([]);
-      }
-  }, [date,timeSlots]);
+    else {
+      setDisabledSlots([]);
+    }
+  }, [date, timeSlots]);
 
 
   // Fetch bookings whenever selectedDate or selectedTime changes
@@ -205,8 +203,8 @@ function AslamChicken() {
     setSelectedValue(e.target.value);
   };
 
-  
- 
+
+
   return (
     <div>
       <Navbar />
@@ -239,10 +237,10 @@ function AslamChicken() {
                 </div>
                 <div>
                   <select className="combobox" id="comboBox" value={selectedValue} onChange={handleChange} disabled={!date}>
-                  <option value="">-- Select a timing --</option>
-                  {timeSlots.map((slot, index) => (
-        <option key={index} value={slot} disabled={disabledSlots.includes(slot)}>{slot}</option>
-      ))}
+                    <option value="">-- Select a timing --</option>
+                    {timeSlots.map((slot, index) => (
+                      <option key={index} value={slot} disabled={disabledSlots.includes(slot)}>{slot}</option>
+                    ))}
                   </select>
                 </div>
               </div>

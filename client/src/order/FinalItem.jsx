@@ -3,23 +3,22 @@ import './FinalItem.css'
 import { Link } from 'react-router-dom';
 import axios from "axios";
 import { useRef } from "react";
-import { useNavigate } from 'react-router-dom';
-import BookingApi from '../apis/BookingApi';
-import TicketEmailApi from '../apis/TicketEmailApi';
+import {useNavigate } from 'react-router-dom';
+import BookingApi from "../apis/BookingApi";
+import TicketEmailApi from "../apis/TicketEmailApi";
 
 const FinalItem = () => {
   const pdfRef = useRef();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [ticket, setTicket] = useState({
-    Restraunt: localStorage.getItem("restraunt"),
-    BranchName: localStorage.getItem("branch name"),
-    Seat: localStorage.getItem("seats"),
-    item: localStorage.getItem("item"),
-    time: localStorage.getItem("time"),
-    date: localStorage.getItem("date"),
-    contact: localStorage.getItem("contact")
-  });
+  const [ticket, setTicket] = useState({ 
+     Restraunt: localStorage.getItem("restraunt"),
+   BranchName : localStorage.getItem("branch name"),
+   Seat : localStorage.getItem("seats"),
+   item : localStorage.getItem("item"),
+   time : localStorage.getItem("time"),
+   date : localStorage.getItem("date"),
+   contact : localStorage.getItem("contact")});
 
   const [OrderId, setOrderId] = useState('');
   // Function to generate a random 10-digit number
@@ -34,7 +33,7 @@ const FinalItem = () => {
   const Restraunt = localStorage.getItem("restraunt");
   const BranchName = localStorage.getItem("branch name");
   const Seat = localStorage.getItem("seats");
-  const id = localStorage.getItem("id");
+  const id=localStorage.getItem("id");
   const item = localStorage.getItem("item");
   const time = localStorage.getItem("time");
   const date = localStorage.getItem("date");
@@ -49,8 +48,7 @@ const FinalItem = () => {
       //pdf function over here
       try {
         // Make an API request to create a new user
-        const response = await BookingApi.post(
-          "/", {
+        const response = await BookingApi.post("/", {
           OrderId,
           Restraunt,
           BranchName,
@@ -69,13 +67,13 @@ const FinalItem = () => {
           // Redirect or perform other actions as needed
           setIsLoading(true);
           try {
-            const emailResponse = await TicketEmailApi.post("/", { userEmail: UserEmail, ticket });
-            navigate(`/Done`);
+            const emailResponse = await TicketEmailApi.post('/', { userEmail: UserEmail, ticket });
+            navigate(`/Done`);  
           } catch (error) {
             console.error('Error sending email:', error);
-          } finally {
-            setIsLoading(false);
-          }
+      } finally {
+        setIsLoading(false);
+      }   
         }
       } catch (error) {
         // Handle registration errors
@@ -84,13 +82,13 @@ const FinalItem = () => {
       }
       checkbox.checked = false;
       checkboxtwo.checked = false;
-      checkboxthree.checked = false;
+      checkboxthree.checked =false;
     } else {
       window.confirm("Please agree to T&C to proceed");
     }
-
+   
   };
-  const cancel_all = () => {
+  const cancel_all=()=>{
     localStorage.removeItem("date");
     localStorage.removeItem("time");
     localStorage.removeItem("contact");
@@ -160,7 +158,7 @@ const FinalItem = () => {
           <label>click the checkbox to confirm Terms And Condition.</label>
         </div>
       </form>
-      <button className='book_button' onClick={submit}>Book Now</button>
+      <button className='book_button' onClick={submit}>Book Now</button> 
       <button className='book_button' onClick={cancel_all} >Cancel</button>
     </div>
   )

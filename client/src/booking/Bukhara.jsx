@@ -38,15 +38,13 @@ function Bukhara() {
 
   const seatsubmit = () => {
     if (isLoggedIn) {
-      const result = window.confirm(`Do you Confirm ${seats} seats`);
-      if (result === true) {
-        totalno = totalseats - seats;
-        totalseats = totalno;
-        if (totalseats >= 0) {
-          navigate("/OrderPopup")
-        } else {
-          alert("Sorry,Booking is Full \n SEE YOU NEXT BYE");
-        }
+      let totalno = totalseats - seats;
+
+      if (totalno >= 0) {
+        // Update total seats and navigate
+        navigate("/OrderPopup");
+      } else {
+        alert("Sorry, Booking is Full \n SEE YOU NEXT TIME");
       }
       localStorage.setItem("restraunt", restaurantName);
       localStorage.setItem("branch name", bname);

@@ -55,8 +55,7 @@ function Login() {
         const OTP = Math.floor(Math.random() * 9000 + 1000);
         console.log(OTP);
         setOTP(OTP);
-        RecoveryEmailApi
-          .post("/", {
+        RecoveryEmailApi.post("/", {
             OTP,
             recipient_email: email,
           })
