@@ -13,13 +13,13 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
 
   const submit = useCallback(async (e) => {
     e.preventDefault();
     if (email === "restaurant@gmail.com" && password === "0987654321") {
       navigate('/Adminpage');
     } else {
-      const apiUrl = 'http://localhost:3500'; // Hardcoded URL as in original code
       try {
         const res = await axios.get(`${apiUrl}/user/login`, {
           params: {
@@ -51,7 +51,6 @@ function Login() {
   }, [email, password, login, navigate]);
 
   const navigateToOtp = useCallback(() => {
-    const apiUrl = 'http://localhost:3500'; // Hardcoded URL as in original code
     if (email) {
       const OTP = Math.floor(Math.random() * 9000 + 1000);
       console.log(OTP);
