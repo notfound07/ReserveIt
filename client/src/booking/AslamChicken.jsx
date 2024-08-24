@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Navbar from '../nav-foot/Navbar';
 import Footer from '../nav-foot/Footer';
 import { data, tableset } from '../components/Restraunts';
@@ -26,7 +26,6 @@ function AslamChicken() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedSeat, setSelectedSeat] = useState([]);
   const [disabledSlots, setDisabledSlots] = useState([]);
-  const initialSelection = useRef(true);
   const { isLoggedIn } = useAuth();
 
   const areAllSelectionsMade = () => {
@@ -41,22 +40,22 @@ function AslamChicken() {
       totalno = totalseats - seats;
       totalseats = totalno;
       if (totalseats >= 0) {
-          navigate("/OrderPopup");
+        navigate("/OrderPopup");
       } else {
-          // Handle full booking case here without alert
-          console.log("Sorry, booking is full. See you next time.");
+        // Handle full booking case here without alert
+        console.log("Sorry, booking is full. See you next time.");
       }
-      
+
       localStorage.setItem("restraunt", restaurantName);
       localStorage.setItem("branch name", bname);
       localStorage.setItem("time", selectedValue);
       localStorage.setItem("date", date);
       localStorage.setItem("seats", seats);
-  } else {
+    } else {
       // Handle case when user is not logged in
       alert("Please login to confirm seats.");
+    }
   }
-}
 
   const onChange = (date) => {
     setDate(date);
@@ -74,32 +73,33 @@ function AslamChicken() {
     }
   }, [params.id]);
 
-  const timeSlots = [
+  const timeSlots = useMemo(() => [
     "8am-9am", "9am-10am", "10am-11am", "11am-12pm",
     "12pm-1pm", "1pm-2pm", "2pm-3pm", "3pm-4pm",
     "4pm-5pm", "5pm-6pm", "6pm-7pm", "7pm-8pm"
-  ];
+], []);
+
   useEffect(() => {
     const date_t = new Date();
     let hour = date_t.getHours();
     const isPM = hour >= 12;
     hour = hour % 12 || 12; // Converts 0 to 12 for midnight and handles PM conversion
     const showTime = `${hour}${isPM ? 'pm' : 'am'}`;
-    const selecteddate=new Date(date);
+    const selecteddate = new Date(date);
     let matchFound = false;
     const isSameDay = date_t.getFullYear() === selecteddate.getFullYear() &&
-                      date_t.getMonth() === selecteddate.getMonth() &&
-                      date_t.getDate() === selecteddate.getDate();
-    
-    if (isSameDay && showTime ) {
+      date_t.getMonth() === selecteddate.getMonth() &&
+      date_t.getDate() === selecteddate.getDate();
+
+    if (isSameDay && showTime) {
       const disabledSlots = [];
       for (let i = 0; i < timeSlots.length; i++) {
-        const [start, end] = timeSlots[i].split('-');
-        const starts_time=start.trim() // Trim to remove any leading or trailing spaces
+        const [start] = timeSlots[i].split('-');
+        const starts_time = start.trim() // Trim to remove any leading or trailing spaces
         if (starts_time === showTime) {
           matchFound = true;
-           // Disable the matched slot and all previous slots
-           disabledSlots.push(...timeSlots.slice(0, i + 1));
+          // Disable the matched slot and all previous slots
+          disabledSlots.push(...timeSlots.slice(0, i + 1));
           break; // Exit loop once match is found
         }
       }
@@ -107,17 +107,20 @@ function AslamChicken() {
       }
       setDisabledSlots(disabledSlots);
     }
-      else {
-        setDisabledSlots([]);
-      }
-  }, [date,timeSlots]);
+    else {
+      setDisabledSlots([]);
+    }
+  }, [date, timeSlots]);
 
 
   // Fetch bookings whenever selectedDate or selectedTime changes
 
   const fetchAllResponses = async () => {
+    // Use environment variable for API URL
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+
     try {
-      const response = await axios.get("http://localhost:3500/user/Allrecords");
+      const response = await axios.get(`${apiUrl}/user/Allrecords`);
       if (response.status === 200) {
         // Return the array of feedback responses
         setEntries(response.data);
@@ -204,8 +207,8 @@ function AslamChicken() {
     setSelectedValue(e.target.value);
   };
 
-  
- 
+
+
   return (
     <div>
       <Navbar />
@@ -238,10 +241,10 @@ function AslamChicken() {
                 </div>
                 <div>
                   <select className="combobox" id="comboBox" value={selectedValue} onChange={handleChange} disabled={!date}>
-                  <option value="">-- Select a timing --</option>
-                  {timeSlots.map((slot, index) => (
-        <option key={index} value={slot} disabled={disabledSlots.includes(slot)}>{slot}</option>
-      ))}
+                    <option value="">-- Select a timing --</option>
+                    {timeSlots.map((slot, index) => (
+                      <option key={index} value={slot} disabled={disabledSlots.includes(slot)}>{slot}</option>
+                    ))}
                   </select>
                 </div>
               </div>

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import './adminpage.css';
 import Select from 'react-select';
 import Adminnavbar from './Adminnavbar';
+
 function Adminpage() {
   const [entries, setEntries] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -11,33 +12,39 @@ function Adminpage() {
   const [branchOptions, setBranchOptions] = useState([]);
   const [filteredDatas, setFilteredData] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
-  const [show,setShow]=useState();
-  useEffect(() => {
-    const fetchAllResponses = async () => {
-      try {
-        const response = await axios.get("http://localhost:3500/user/Allrecords");
-        if (response.status === 200) {
-          // Return the array of feedback responses
-          setEntries(response.data);
-          localStorage.setItem('AllResponses', JSON.stringify(response.data));
-        }
-      } catch (error) {
-        console.error("Error fetching All responses:", error);
+  const [show, setShow] = useState(false);
+
+  const fetchAllResponses = useCallback(async () => {
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+    try {
+      const response = await axios.get(`${apiUrl}/user/Allrecords`);
+      if (response.status === 200) {
+        setEntries(response.data);
+        localStorage.setItem('AllResponses', JSON.stringify(response.data));
       }
-    };
+    } catch (error) {
+      if (error.response) {
+        console.error(`Error fetching data: ${error.response.data.message}`);
+      } else if (error.request) {
+        console.error("No response received from the server.");
+      } else {
+        console.error(`Error in setting up the request: ${error.message}`);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     const cachedRecords = localStorage.getItem('AllResponses');
     if (cachedRecords) {
-      // If cached records exist, parse and set them into state
       setEntries(JSON.parse(cachedRecords));
     } else {
-      // If no cached records, fetch them
       fetchAllResponses();
     }
     const interval = setInterval(() => {
-      fetchAllResponses()
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
+      fetchAllResponses();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [fetchAllResponses]);
 
   const handleSelectChange = (selectedOption) => {
     setSelectedOption(selectedOption);
@@ -108,42 +115,43 @@ function Adminpage() {
   const handleBranchChange = (selectedBranch) => {
     setSelectedBranch(selectedBranch);
   };
-  const handleFilter = () => {
-    const filterData=filtered.filter(item=>{
-      return item.Restraunt.includes(selectedOption.value) && 
-      item.BranchName.includes(selectedBranch.value)
-    })
-    setFilteredData(filterData);
-    setShow(true);
-  };
-  const filtered = (selectedOption && selectedBranch)
-      ? entries.filter(item =>
+
+  const handleFilter = useCallback(() => {
+    const filterData = (selectedOption && selectedBranch)
+      ? entries.filter(item => 
           item.Restraunt.includes(selectedOption.value) &&
           item.BranchName.includes(selectedBranch.value)
-        ):filteredItems
-  //filter by date
-  const handleDate = () => {
+        )
+      : filteredItems;
+
+    setFilteredData(filterData);
+    setShow(true);
+  }, [entries, selectedOption, selectedBranch, filteredItems]);
+
+  const handleDate = useCallback(() => {
     const today = new Date();
-    const filteredItemsByDate = filtered.filter(item => {
+    const filteredItemsByDate = filteredItems.filter(item => {
       const itemDate = new Date(item.date);
       return today.getFullYear() === itemDate.getFullYear() &&
-      today.getMonth() === itemDate.getMonth() &&
-      today.getDate() === itemDate.getDate();
+        today.getMonth() === itemDate.getMonth() &&
+        today.getDate() === itemDate.getDate();
     });
     setFilteredItems(filteredItemsByDate);
     setShow(false);
-  };
+  }, [filteredItems]);
+
   useEffect(() => {
     handleFilter(); // Apply restaurant and branch filter
     handleDate();   // Apply date filter
-  }, []);
+  }, [handleFilter, handleDate]);
+
   return (
     <div>
       <Adminnavbar />
       <br />
       <h1 style={{ marginTop: 70, textAlign: 'center' }} >Order Details</h1>
       <div className='fliter'>
-      <Select
+        <Select
           className='search-bar'
           value={selectedOption}
           onChange={handleSelectChange}
@@ -166,12 +174,12 @@ function Adminpage() {
           options={branchOptions}
           placeholder="Search Branch..."
         />
-                <button onClick={handleFilter} className='search_today'>Filter</button>
+        <button onClick={handleFilter} className='search_today'>Filter</button>
         <button onClick={handleDate} className='search_today'>Today</button>
       </div>
       <div>
-        <ul class="order-recipt">
-          {show?(
+        <ul className="order-recipt">
+          {show ? (
             filteredDatas.slice().reverse().map(item => (
               <li key={item.id} className="flex-item">
                 <div className="order-cards">
@@ -199,48 +207,46 @@ function Adminpage() {
                   </div>
                 </div>
               </li>
-            )
-            )
-          ):
-         (filteredItems.slice().reverse().map(item => (
-          <li key={item.id} className="flex-item">
-            <div className="order-cards">
-              <div className="order-details" id="target">
-                <h2 className="restaurant-name">{item.Restraunt}</h2>
-                <h3 className="orderS">Order Summary</h3>
-                <hr />
-                <p className="order-info">Branch: {item.BranchName}</p>
-                <p className="order-info">OrderId: #{item.OrderId}</p>
-                <p className="order-info">Seats: {item.Seat}</p>
-                <p className="order-info">Items: {item.item}</p>
-                <p className="order-info">Time: {item.time}</p>
-                <p className="order-info">Reservation Date: {item.date?.substring(0, 16)}</p>
-                <hr />
-              </div>
-              <div className="user-details">
-                <h2>Customer Details</h2>
-                <div className="d-row">
-                  <div>
-                    <p className="order-info">Email: {item.UserEmail}</p>
-                    <p className="order-info">Contact: {item.contact}</p>
+            ))
+          ) : (
+            filteredItems.slice().reverse().map(item => (
+              <li key={item.id} className="flex-item">
+                <div className="order-cards">
+                  <div className="order-details" id="target">
+                    <h2 className="restaurant-name">{item.Restraunt}</h2>
+                    <h3 className="orderS">Order Summary</h3>
+                    <hr />
+                    <p className="order-info">Branch: {item.BranchName}</p>
+                    <p className="order-info">OrderId: #{item.OrderId}</p>
+                    <p className="order-info">Seats: {item.Seat}</p>
+                    <p className="order-info">Items: {item.item}</p>
+                    <p className="order-info">Time: {item.time}</p>
+                    <p className="order-info">Reservation Date: {item.date?.substring(0, 16)}</p>
+                    <hr />
+                  </div>
+                  <div className="user-details">
+                    <h2>Customer Details</h2>
+                    <div className="d-row">
+                      <div>
+                        <p className="order-info">Email: {item.UserEmail}</p>
+                        <p className="order-info">Contact: {item.contact}</p>
+                      </div>
+                    </div>
+                    <p className="order-time">{moment(item.bookedOn).fromNow()}</p>
                   </div>
                 </div>
-                <p className="order-time">{moment(item.bookedOn).fromNow()}</p>
-              </div>
-            </div>
-          </li>
-        )
-        )
-        )}
-       {!show && selectedOption === null &&(
-      <li key="select-option" className="msg">
-        Please select a restaurant and branch.
-      </li>
-    )}
+              </li>
+            ))
+          )}
+          {!show && selectedOption === null && (
+            <li key="select-option" className="msg">
+              Please select a restaurant and branch.
+            </li>
+          )}
         </ul>
       </div>
     </div>
-  )
+  );
 }
 
-export default Adminpage
+export default Adminpage;

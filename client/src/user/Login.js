@@ -1,11 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import './Style.css';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import logo from '../assets/key_1.webp';
 import { useContext } from 'react';
 import { RecoveryContext } from '../App';
+
 function Login() {
   const { setEmail, email, setOTP } = useContext(RecoveryContext);
   const [password, setPassword] = useState("");
@@ -13,68 +14,67 @@ function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  async function submit(e) {
-    e.preventDefault(); 
-    if (email==="restaurant@gmail.com" && password==="0987654321"){
+  const submit = useCallback(async (e) => {
+    e.preventDefault();
+    if (email === "restaurant@gmail.com" && password === "0987654321") {
       navigate('/Adminpage');
-    }
-    else{
-    try {
-      const res = await axios.get("http://localhost:3500/user/login", {
-        params: {
-          email,
-          password,
-        },
-      });
+    } else {
+      const apiUrl = 'http://localhost:3500'; // Hardcoded URL as in original code
+      try {
+        const res = await axios.get(`${apiUrl}/user/login`, {
+          params: {
+            email,
+            password,
+          },
+        });
 
-      if (res.status === 200) {
-        const { token } = res.data;
-        login(token); // Pass the token to the login function
-        navigate("/Home");
-        localStorage.setItem('email', email); // Save email to localStorage
-      }
-    } catch (err) {
-      if (err.response && err.response.status === 400) {
-        alert(err.response.data.message); // Display specific error messages from the server
-      } else if (err.response && err.response.status === 401) {
-        alert(err.response.data.message);
-      } else if (err.response && err.response.status === 500) {
-        alert("Something went wrong");
-      } else {
-        alert("An unexpected error occurred");
+        if (res.status === 200) {
+          const { token } = res.data;
+          login(token); // Pass the token to the login function
+          navigate("/Home");
+          localStorage.setItem('email', email); // Save email to localStorage
+        }
+      } catch (err) {
+        if (err.response) {
+          console.error(`Error: ${err.response.data.message}`);
+          if (err.response.status === 400 || err.response.status === 401) {
+            alert(err.response.data.message); // Display specific error messages from the server
+          } else if (err.response.status === 500) {
+            alert("Something went wrong");
+          }
+        } else {
+          alert("An unexpected error occurred");
+        }
       }
     }
-  }
     localStorage.setItem(1, email);
-  }
+  }, [email, password, login, navigate]);
 
-  function navigateToOtp() {
-    try {
-      if (email) {
-        const OTP = Math.floor(Math.random() * 9000 + 1000);
-        console.log(OTP);
-        setOTP(OTP);
-        axios
-          .post("http://localhost:3500/send_recovery_email", {
-            OTP,
-            recipient_email: email,
-          })
-          .then(() => navigate('/OTPinput'))
-          .catch(console.log);
-        setIsLoading(true);
-        return;
-      }
+  const navigateToOtp = useCallback(() => {
+    const apiUrl = 'http://localhost:3500'; // Hardcoded URL as in original code
+    if (email) {
+      const OTP = Math.floor(Math.random() * 9000 + 1000);
+      console.log(OTP);
+      setOTP(OTP);
+      axios
+        .post(`${apiUrl}/send_recovery_email`, {
+          OTP,
+          recipient_email: email,
+        })
+        .then(() => navigate('/OTPinput'))
+        .catch((error) => {
+          if (error.response) {
+            console.error(`Error sending OTP: ${error.response.data.message}`);
+          } else {
+            console.error('An unexpected error occurred while sending OTP.');
+          }
+        });
+      setIsLoading(true);
+    } else {
       setIsLoading(false);
-      return alert("Please enter your email");
+      alert("Please enter your email");
     }
-    catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
-        alert(error.response.data.message);
-      } else {
-        alert('An unexpected error occurred. Please try again.');
-      }
-    }
-  }
+  }, [email, navigate, setOTP]);
 
 
   return (

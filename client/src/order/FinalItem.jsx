@@ -1,23 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './FinalItem.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './FinalItem.css';
 
 const FinalItem = () => {
   const pdfRef = useRef();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [ticket, setTicket] = useState({ 
-    Restraunt: localStorage.getItem("restraunt"),
-    BranchName: localStorage.getItem("branch name"),
-    Seat: localStorage.getItem("seats"),
-    item: localStorage.getItem("item"),
-    time: localStorage.getItem("time"),
-    date: localStorage.getItem("date"),
-    contact: localStorage.getItem("contact")
-  });
-
   const [OrderId, setOrderId] = useState('');
+  const [checkboxChecked, setCheckboxChecked] = useState(false);
+  const [checkboxTwoChecked, setCheckboxTwoChecked] = useState(false);
+  const [checkboxThreeChecked, setCheckboxThreeChecked] = useState(false);
+
+  // Generate Order ID
   function generateOrderId() {
     const randomNumber = Math.floor(1000000000 + Math.random() * 9000000000);
     setOrderId(randomNumber.toString());
@@ -27,7 +22,8 @@ const FinalItem = () => {
     generateOrderId();
   }, []);
 
-  const UserEmail = localStorage.getItem("email"); // Ensure "email" is the correct key
+  // Retrieve local storage data
+  const UserEmail = localStorage.getItem("email");
   const Restraunt = localStorage.getItem("restraunt");
   const BranchName = localStorage.getItem("branch name");
   const Seat = localStorage.getItem("seats");
@@ -37,15 +33,16 @@ const FinalItem = () => {
   const date = localStorage.getItem("date");
   const contact = localStorage.getItem("contact");
 
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+
   const submit = async (e) => {
     e.preventDefault();
-    const checkbox = document.getElementById('myCheckbox');
-    const checkboxtwo = document.getElementById('myCheckbox2');
-    const checkboxthree = document.getElementById('myCheckbox3');
-    
-    if (checkbox.checked && checkboxtwo.checked && checkboxthree.checked) {
+
+    if (checkboxChecked && checkboxTwoChecked && checkboxThreeChecked) {
+      setIsLoading(true);
+
       try {
-        const response = await axios.post("http://localhost:3500/user/booking", {
+        const response = await axios.post(`${apiUrl}/user/booking`, {
           OrderId,
           Restraunt,
           BranchName,
@@ -64,26 +61,39 @@ const FinalItem = () => {
 
         if (response.status === 201) {
           console.log("Data Submitted Successfully");
-          setIsLoading(true);
+
           try {
-            const emailResponse = await axios.post('http://localhost:3500/send_ticket_email', { userEmail: UserEmail, ticket });
-            navigate(`/Done`);  
+            await axios.post(`${apiUrl}/send_ticket_email`, {
+              userEmail: UserEmail,
+              ticket: {
+                Restraunt,
+                BranchName,
+                Seat,
+                item,
+                time,
+                date,
+                contact
+              }
+            });
+            navigate(`/Done`);
           } catch (error) {
             console.error('Error sending email:', error);
           } finally {
             setIsLoading(false);
-          }   
+          }
         }
       } catch (error) {
         console.error("Error in Submission", error);
         alert("Server is low");
+        setIsLoading(false);
       }
-      
-      checkbox.checked = false;
-      checkboxtwo.checked = false;
-      checkboxthree.checked = false;
+
+      // Reset checkbox states
+      setCheckboxChecked(false);
+      setCheckboxTwoChecked(false);
+      setCheckboxThreeChecked(false);
     } else {
-      window.confirm("Please agree to T&C to proceed");
+      alert("Please agree to T&C to proceed");
     }
   };
 
@@ -143,15 +153,30 @@ const FinalItem = () => {
           <label>Please read the Terms And Condition Below</label>
         </div>
         <div className='book_lable'>
-          <input type='checkbox' id="myCheckbox" />
+          <input
+            type='checkbox'
+            id="myCheckbox"
+            checked={checkboxChecked}
+            onChange={(e) => setCheckboxChecked(e.target.checked)}
+          />
           <label className='book_lable'>The seats will be reserved for only 15-20 mins after that they will be cancelled.</label>
         </div>
         <div className='book_lable'>
-          <input type='checkbox' id="myCheckbox2" />
+          <input
+            type='checkbox'
+            id="myCheckbox2"
+            checked={checkboxTwoChecked}
+            onChange={(e) => setCheckboxTwoChecked(e.target.checked)}
+          />
           <label className='book_lable'>The amount will be paid at the restaurant only, no online payment available.</label>
         </div>
         <div className='book_lable'>
-          <input type='checkbox' id="myCheckbox3" />
+          <input
+            type='checkbox'
+            id="myCheckbox3"
+            checked={checkboxThreeChecked}
+            onChange={(e) => setCheckboxThreeChecked(e.target.checked)}
+          />
           <label className='book_lable'>Service Charge 5% and GST 18% included</label>
         </div>
         <div className='book_lable'>

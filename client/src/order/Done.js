@@ -1,11 +1,12 @@
 import React from 'react';
-import './Done.css'
-import {useNavigate } from 'react-router-dom'
+import './Done.css';
+import { useNavigate } from 'react-router-dom';
 
 function Done() {
-  const useremail=localStorage.getItem(1);
-  const navigate=useNavigate()
-  const fresh=()=>{
+  const useremail = localStorage.getItem(1);
+  const navigate = useNavigate();
+
+  const fresh = () => {
     localStorage.removeItem("date");
     localStorage.removeItem("time");
     localStorage.removeItem("contact");
@@ -15,19 +16,21 @@ function Done() {
     localStorage.removeItem("seats");
     localStorage.removeItem("branch name");
     navigate('/Home');
-  }
+  };
+
   return (
     <div className='body'>
-      <div class="card">
+      <div className="card">
         <div>
-          <i class="checkmark">✓</i>
+          <i className="checkmark">✓</i>
         </div>
-        <h1 className='h-done '>Success</h1>
+        <h1 className='h-done'>Success</h1>
         <p className='p-done'>Booking Confirmed</p>
-        <p className='p-done'>Email has been sent to {useremail} </p>
-        <a className="popup-goes" onClick={fresh}>Thank You</a>
+        <p className='p-done'>Email has been sent to {useremail}</p>
+        <button className="popup-goes" onClick={fresh} type="button">Thank You</button>
       </div>
     </div>
-  )
+  );
 }
-export default Done
+
+export default Done;

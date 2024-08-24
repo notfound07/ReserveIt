@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useMemo, useState, useEffect } from 'react';
 import Navbar from '../nav-foot/Navbar';
 import Footer from '../nav-foot/Footer';
 import { data, tableset } from '../components/Restraunts';
@@ -26,7 +26,6 @@ function Varq() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedSeat, setSelectedSeat] = useState([]);
   const [disabledSlots, setDisabledSlots] = useState([]);
-  const initialSelection = useRef(true);
   const { isLoggedIn } = useAuth();
 
   const areAllSelectionsMade = () => {
@@ -74,11 +73,12 @@ function Varq() {
     }
   }, [params.id]);
 
-  const timeSlots = [
+  const timeSlots = useMemo(() => [
     "8am-9am", "9am-10am", "10am-11am", "11am-12pm",
     "12pm-1pm", "1pm-2pm", "2pm-3pm", "3pm-4pm",
     "4pm-5pm", "5pm-6pm", "6pm-7pm", "7pm-8pm"
-  ];
+], []);
+
   useEffect(() => {
     const date_t = new Date();
     let hour = date_t.getHours();
@@ -94,7 +94,7 @@ function Varq() {
     if (isSameDay && showTime) {
       const disabledSlots = [];
       for (let i = 0; i < timeSlots.length; i++) {
-        const [start, end] = timeSlots[i].split('-');
+        const [start] = timeSlots[i].split('-');
         const starts_time = start.trim() // Trim to remove any leading or trailing spaces
         if (starts_time === showTime) {
           matchFound = true;
@@ -116,8 +116,11 @@ function Varq() {
   // Fetch bookings whenever selectedDate or selectedTime changes
 
   const fetchAllResponses = async () => {
+    // Use environment variable for API URL
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+  
     try {
-      const response = await axios.get("http://localhost:3500/user/Allrecords");
+      const response = await axios.get(`${apiUrl}/user/Allrecords`);
       if (response.status === 200) {
         // Return the array of feedback responses
         setEntries(response.data);
