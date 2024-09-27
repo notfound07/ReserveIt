@@ -270,9 +270,10 @@ const signup = async (req, res) => {
 };
 
 // Function to handle feedback submission
+// Function to handle feedback submission
 const feedback = async (req, res) => {
     try {
-        const { name, email, message } = req.body;
+        const { name, email, message } = req.body; // Ensure this matches what you send from the client
 
         // Validating the feedback data.
         if (!name || !email || !message) {
@@ -283,7 +284,7 @@ const feedback = async (req, res) => {
         const newFeedback = await Feedback.create({
             name,
             email,
-            message
+            msg: message// Make sure this key matches the one in your frontend
         });
 
         // Respond with success message
@@ -293,6 +294,7 @@ const feedback = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 // Function to retrieve all feedback
 const Allfeedbacks = async (req, res) => {

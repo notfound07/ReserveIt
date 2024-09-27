@@ -25,13 +25,11 @@ function Contact() {
       const response = await axios.post(`${baseURL}/feedback`, {
         name,
         email,
-        msg,
+        message: msg,
       });
 
       if (response.status === 201) {
         // Feedback submission was successful
-        console.log("Feedback Successful");
-        console.log("Responded Data", response.data);
 
         // Clear form fields
         setName("");
@@ -54,10 +52,14 @@ function Contact() {
   useEffect(() => {
     const fetchFeedbackResponses = async () => {
       // Use environment variable for API URL
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+      const baseURL =
+      window.location.hostname === "localhost"
+        ? "http://localhost:3500/user"
+        : `${window.location.protocol}//${window.location.hostname}/user`;
+  
 
       try {
-        const response = await axios.get(`${apiUrl}/user/feedbacks`);
+        const response = await axios.get(`${baseURL}/feedbacks`);
         if (response.status === 200) {
           // Return the array of feedback responses
           setRecords(response.data);
