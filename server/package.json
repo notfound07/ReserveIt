@@ -1,5 +1,6 @@
 {
   "name": "server",
+  "homepage": "https://reserveit-website.onrender.com",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
