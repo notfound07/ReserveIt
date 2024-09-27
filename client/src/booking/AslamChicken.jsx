@@ -120,7 +120,7 @@ function AslamChicken() {
     const baseURL =
     window.location.hostname === "localhost"
       ? "http://localhost:3500/user"
-      : `${window.location.protocol}//${window.location.hostname}/user`;
+      : `${window.location.protocol}//reserveit-server.onrender.com/user`;
 
     try {
       const response = await axios.get(`${baseURL}/Allrecords`);
