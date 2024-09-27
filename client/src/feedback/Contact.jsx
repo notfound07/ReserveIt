@@ -15,11 +15,14 @@ function Contact() {
     e.preventDefault();
 
     // Use environment variable for API URL
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+    const baseURL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:3500/user"
+      : `${window.location.protocol}//${window.location.hostname}/user`;
 
     try {
       // Make an API request to create a new user feedback
-      const response = await axios.post(`${apiUrl}/user/feedback`, {
+      const response = await axios.post(`${baseURL}/feedback`, {
         name,
         email,
         msg,

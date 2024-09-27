@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { RecoveryContext } from '../App';
 import './otp-reset.css';
 import { Link, useNavigate } from 'react-router-dom';
@@ -7,26 +7,33 @@ import axios from 'axios';
 const OTPinput = () => {
   const { email, otp } = useContext(RecoveryContext);
   const [timerCount, setTimer] = useState(60);
-  const [OTPinput, setOTPinput] = useState([0, 0, 0, 0]);
+  const [OTPinput, setOTPinput] = useState(["", "", "", ""]); // Changed initial state to empty strings
   const [disable, setDisable] = useState(true);
-  const [loading, setLoading] = useState(false); // Added loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+  const inputRefs = useRef([]); // Create a ref array for inputs
+
+  const baseURL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:3500/user"
+      : `${window.location.protocol}//${window.location.hostname}/user`;
 
   function resendOTP() {
     if (disable) return;
 
-    axios.post(`${apiUrl}/send_recovery_email`, {
+    axios.post(`${baseURL}/send_recovery_email`, {
       OTP: otp,
       recipient_email: email,
     })
-      .then(() => setDisable(true))
-      .then(() => alert("A new OTP has successfully been sent to your email."))
-      .then(() => setTimer(60))
+      .then(() => {
+        setDisable(true);
+        alert("A new OTP has successfully been sent to your email.");
+        setTimer(60);
+      })
       .catch(console.log);
   }
 
-  function verfiyOTP() {
+  function verifyOTP() {
     setLoading(true); // Start loading
 
     // Simulate a delay for demonstration purposes
@@ -37,21 +44,47 @@ const OTPinput = () => {
         alert("The code you have entered is not correct, try again or re-send the link");
       }
       setLoading(false); // Stop loading
-    }, 1000); // Adjust delay as needed
+    }, 1000);
   }
 
   useEffect(() => {
     let interval = setInterval(() => {
       setTimer((lastTimerCount) => {
-        lastTimerCount <= 1 && clearInterval(interval);
-        if (lastTimerCount <= 1) setDisable(false);
-        if (lastTimerCount <= 0) return lastTimerCount;
+        if (lastTimerCount <= 1) {
+          clearInterval(interval);
+          setDisable(false);
+          return lastTimerCount;
+        }
         return lastTimerCount - 1;
       });
-    }, 1000); // Each count lasts for a second
+    }, 1000);
+    
     // Cleanup the interval on complete
     return () => clearInterval(interval);
   }, [disable]);
+
+  useEffect(() => {
+    // Automatically focus the first input field on mount
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus();
+    }
+  }, []);
+
+  const handleInputChange = (e, index) => {
+    const value = e.target.value;
+
+    // Only accept digits (0-9)
+    if (/^[0-9]$/.test(value) || value === '') {
+      const newOTPinput = [...OTPinput];
+      newOTPinput[index] = value;
+      setOTPinput(newOTPinput);
+
+      // Move to next input
+      if (value && index < 3) {
+        inputRefs.current[index + 1].focus();
+      }
+    }
+  };
 
   return (
     <div>
@@ -68,17 +101,14 @@ const OTPinput = () => {
                   maxLength="1"
                   type="text"
                   value={value}
-                  onChange={(e) => {
-                    const newOTPinput = [...OTPinput];
-                    newOTPinput[index] = e.target.value;
-                    setOTPinput(newOTPinput);
-                  }}
+                  ref={el => inputRefs.current[index] = el} // Assign ref to input
+                  onChange={(e) => handleInputChange(e, index)} // Use the new handler
                 />
               </div>
             ))}
           </div>
           <div>
-            <button className="verify_button" onClick={verfiyOTP} disabled={loading}>
+            <button className="verify_button" onClick={verifyOTP} disabled={loading}>
               {loading ? "Verifying..." : "Verify Account"}
             </button>
           </div>

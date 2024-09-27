@@ -117,10 +117,13 @@ function Karim() {
 
   const fetchAllResponses = async () => {
     // Use environment variable for API URL
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+    const baseURL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:3500/user"
+      : `${window.location.protocol}//${window.location.hostname}/user`;
   
     try {
-      const response = await axios.get(`${apiUrl}/user/Allrecords`);
+      const response = await axios.get(`${baseURL}/Allrecords`);
       if (response.status === 200) {
         // Return the array of feedback responses
         setEntries(response.data);

@@ -13,12 +13,15 @@ const Reset = () => {
     const submit = async (e) => {
         e.preventDefault();
 
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+        const baseURL =
+        window.location.hostname === "localhost"
+          ? "http://localhost:3500/user"
+          : `${window.location.protocol}//${window.location.hostname}/user`;
       
         setLoading(true); // Set loading to true before making request
 
         try {
-            const response = await axios.post(`${apiUrl}/user/reset_password`, {
+            const response = await axios.post(`${baseURL}/reset_password`, {
                 email,
                 password,
                 confirmpassword,

@@ -13,10 +13,10 @@ const FinalItem = () => {
   const [checkboxThreeChecked, setCheckboxThreeChecked] = useState(false);
 
   // Generate Order ID
-  function generateOrderId() {
+  const generateOrderId = () => {
     const randomNumber = Math.floor(1000000000 + Math.random() * 9000000000);
     setOrderId(randomNumber.toString());
-  }
+  };
 
   useEffect(() => {
     generateOrderId();
@@ -33,7 +33,10 @@ const FinalItem = () => {
   const date = localStorage.getItem("date");
   const contact = localStorage.getItem("contact");
 
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+  const baseURL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:3500/user"
+      : `${window.location.protocol}//${window.location.hostname}/user`;
 
   const submit = async (e) => {
     e.preventDefault();
@@ -42,7 +45,7 @@ const FinalItem = () => {
       setIsLoading(true);
 
       try {
-        const response = await axios.post(`${apiUrl}/user/booking`, {
+        const response = await axios.post(`${baseURL}/booking`, {
           OrderId,
           Restraunt,
           BranchName,
@@ -61,43 +64,30 @@ const FinalItem = () => {
 
         if (response.status === 201) {
           console.log("Data Submitted Successfully");
-
-          try {
-            await axios.post(`${apiUrl}/send_ticket_email`, {
-              userEmail: UserEmail,
-              ticket: {
-                Restraunt,
-                BranchName,
-                Seat,
-                item,
-                time,
-                date,
-                contact
-              }
-            });
-            navigate(`/Done`);
-          } catch (error) {
-            console.error('Error sending email:', error);
-          } finally {
-            setIsLoading(false);
-          }
+          navigate(`/Done`);
         }
       } catch (error) {
         console.error("Error in Submission", error);
-        alert("Server is low");
+        alert("An error occurred while submitting the booking. Please try again.");
+      } finally {
         setIsLoading(false);
+        // Clear local storage after submission
+        localStorage.removeItem("date");
+        localStorage.removeItem("time");
+        localStorage.removeItem("contact");
+        localStorage.removeItem("id");
+        localStorage.removeItem("item");
+        localStorage.removeItem("restraunt");
+        localStorage.removeItem("seats");
+        localStorage.removeItem("branch name");
       }
-
-      // Reset checkbox states
-      setCheckboxChecked(false);
-      setCheckboxTwoChecked(false);
-      setCheckboxThreeChecked(false);
     } else {
       alert("Please agree to T&C to proceed");
     }
   };
 
   const cancel_all = () => {
+    // Clear local storage and navigate back to home
     localStorage.removeItem("date");
     localStorage.removeItem("time");
     localStorage.removeItem("contact");
@@ -114,7 +104,7 @@ const FinalItem = () => {
       {isLoading && (
         <div className="loading-overlay">
           <div className="loading-circle"></div>
-          <div className="loading-text">Wait it might take few seconds</div>
+          <div className="loading-text">Wait, it might take a few seconds</div>
         </div>
       )}
       <form className='font' ref={pdfRef}>
@@ -123,7 +113,7 @@ const FinalItem = () => {
           <label>OrderId: #{OrderId}</label>
         </div>
         <div className='book_lable'>
-          <label>{Restraunt}</label>
+          <label>Restaurant: {Restraunt}</label>
         </div>
         <div className='book_lable'>
           <label>Branch: {BranchName}</label>
@@ -132,7 +122,7 @@ const FinalItem = () => {
           <label>Email : {UserEmail}</label>
         </div>
         <div className='book_lable'>
-          <label>No.of.Seats : {Seat}</label>
+          <label>No. of Seats : {Seat}</label>
         </div>
         <div className='book_lable'>
           <label>Items :  {item}</label>

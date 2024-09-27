@@ -15,11 +15,16 @@ function Adminpage() {
   const [show, setShow] = useState(false);
 
   const fetchAllResponses = useCallback(async () => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3500';
+    const baseURL =
+      window.location.hostname === "localhost"
+        ? "http://localhost:3500/user"
+        : `${window.location.protocol}//${window.location.hostname}/user`;
+
     try {
-      const response = await axios.get(`${apiUrl}/user/Allrecords`);
+      const response = await axios.get(`${baseURL}/Allrecords`);
       if (response.status === 200) {
         setEntries(response.data);
+        setFilteredItems(response.data); // Initialize filtered items
         localStorage.setItem('AllResponses', JSON.stringify(response.data));
       }
     } catch (error) {
@@ -36,7 +41,9 @@ function Adminpage() {
   useEffect(() => {
     const cachedRecords = localStorage.getItem('AllResponses');
     if (cachedRecords) {
-      setEntries(JSON.parse(cachedRecords));
+      const data = JSON.parse(cachedRecords);
+      setEntries(data);
+      setFilteredItems(data); // Initialize filtered items
     } else {
       fetchAllResponses();
     }
@@ -117,39 +124,42 @@ function Adminpage() {
   };
 
   const handleFilter = useCallback(() => {
-    const filterData = (selectedOption && selectedBranch)
-      ? entries.filter(item => 
-          item.Restraunt.includes(selectedOption.value) &&
-          item.BranchName.includes(selectedBranch.value)
-        )
-      : filteredItems;
+    if (selectedOption && selectedBranch) {
+      const filterData = entries.filter(item => 
+        item.Restraunt.includes(selectedOption.value) &&
+        item.BranchName.includes(selectedBranch.value)
+      );
 
-    setFilteredData(filterData);
-    setShow(true);
-  }, [entries, selectedOption, selectedBranch, filteredItems]);
+      setFilteredData(filterData);
+      setShow(true); // Show filtered data
+    } else {
+      setFilteredData(entries); // Show all entries if no filters are selected
+      setShow(false); // Hide any filtered state
+    }
+  }, [entries, selectedOption, selectedBranch]);
 
   const handleDate = useCallback(() => {
     const today = new Date();
-    const filteredItemsByDate = filteredItems.filter(item => {
+    const filteredItemsByDate = entries.filter(item => {
       const itemDate = new Date(item.date);
       return today.getFullYear() === itemDate.getFullYear() &&
-        today.getMonth() === itemDate.getMonth() &&
-        today.getDate() === itemDate.getDate();
+             today.getMonth() === itemDate.getMonth() &&
+             today.getDate() === itemDate.getDate();
     });
+    
     setFilteredItems(filteredItemsByDate);
-    setShow(false);
-  }, [filteredItems]);
+    setShow(true); // Ensure you show the filtered data
+  }, [entries]);
 
   useEffect(() => {
     handleFilter(); // Apply restaurant and branch filter
-    handleDate();   // Apply date filter
-  }, [handleFilter, handleDate]);
+  }, [handleFilter]);
 
   return (
     <div>
       <Adminnavbar />
       <br />
-      <h1 style={{ marginTop: 70, textAlign: 'center' }} >Order Details</h1>
+      <h1 style={{ marginTop: 70, textAlign: 'center' }}>Order Details</h1>
       <div className='fliter'>
         <Select
           className='search-bar'
@@ -180,68 +190,71 @@ function Adminpage() {
       <div>
         <ul className="order-recipt">
           {show ? (
-            filteredDatas.slice().reverse().map(item => (
-              <li key={item.id} className="flex-item">
-                <div className="order-cards">
-                  <div className="order-details" id="target">
-                    <h2 className="restaurant-name">{item.Restraunt}</h2>
-                    <h3 className="orderS">Order Summary</h3>
-                    <hr />
-                    <p className="order-info">Branch: {item.BranchName}</p>
-                    <p className="order-info">OrderId: #{item.OrderId}</p>
-                    <p className="order-info">Seats: {item.Seat}</p>
-                    <p className="order-info">Items: {item.item}</p>
-                    <p className="order-info">Time: {item.time}</p>
-                    <p className="order-info">Reservation Date: {item.date?.substring(0, 16)}</p>
-                    <hr />
-                  </div>
-                  <div className="user-details">
-                    <h2>Customer Details</h2>
-                    <div className="d-row">
-                      <div>
-                        <p className="order-info">Email: {item.UserEmail}</p>
-                        <p className="order-info">Contact: {item.contact}</p>
-                      </div>
+            filteredDatas.length > 0 ? (
+              filteredDatas.slice().reverse().map(item => (
+                <li key={item.id} className="flex-item">
+                  <div className="order-cards">
+                    <div className="order-details" id="target">
+                      <h2 className="restaurant-name">{item.Restraunt}</h2>
+                      <h3 className="orderS">Order Summary</h3>
+                      <hr />
+                      <p className="order-info">Branch: {item.BranchName}</p>
+                      <p className="order-info">OrderId: #{item.OrderId}</p>
+                      <p className="order-info">Seats: {item.Seat}</p>
+                      <p className="order-info">Items: {item.item}</p>
+                      <p className="order-info">Time: {item.time}</p>
+                      <p className="order-info">Reservation Date: {item.date?.substring(0, 16)}</p>
+                      <hr />
                     </div>
-                    <p className="order-time">{moment(item.bookedOn).fromNow()}</p>
+                    <div className="user-details">
+                      <h2>Customer Details</h2>
+                      <div className="d-row">
+                        <div>
+                          <p className="order-info">Email: {item.UserEmail}</p>
+                          <p className="order-info">Contact: {item.contact}</p>
+                        </div>
+                      </div>
+                      <p className="order-time">{moment(item.bookedOn).fromNow()}</p>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))
+                </li>
+              ))
+            ) : (
+              <li key="no-data" className="msg">No data found for the selected filters.</li>
+            )
           ) : (
-            filteredItems.slice().reverse().map(item => (
-              <li key={item.id} className="flex-item">
-                <div className="order-cards">
-                  <div className="order-details" id="target">
-                    <h2 className="restaurant-name">{item.Restraunt}</h2>
-                    <h3 className="orderS">Order Summary</h3>
-                    <hr />
-                    <p className="order-info">Branch: {item.BranchName}</p>
-                    <p className="order-info">OrderId: #{item.OrderId}</p>
-                    <p className="order-info">Seats: {item.Seat}</p>
-                    <p className="order-info">Items: {item.item}</p>
-                    <p className="order-info">Time: {item.time}</p>
-                    <p className="order-info">Reservation Date: {item.date?.substring(0, 16)}</p>
-                    <hr />
-                  </div>
-                  <div className="user-details">
-                    <h2>Customer Details</h2>
-                    <div className="d-row">
-                      <div>
-                        <p className="order-info">Email: {item.UserEmail}</p>
-                        <p className="order-info">Contact: {item.contact}</p>
-                      </div>
+            filteredItems.length > 0 ? (
+              filteredItems.slice().reverse().map(item => (
+                <li key={item.id} className="flex-item">
+                  <div className="order-cards">
+                    <div className="order-details" id="target">
+                      <h2 className="restaurant-name">{item.Restraunt}</h2>
+                      <h3 className="orderS">Order Summary</h3>
+                      <hr />
+                      <p className="order-info">Branch: {item.BranchName}</p>
+                      <p className="order-info">OrderId: #{item.OrderId}</p>
+                      <p className="order-info">Seats: {item.Seat}</p>
+                      <p className="order-info">Items: {item.item}</p>
+                      <p className="order-info">Time: {item.time}</p>
+                      <p className="order-info">Reservation Date: {item.date?.substring(0, 16)}</p>
+                      <hr />
                     </div>
-                    <p className="order-time">{moment(item.bookedOn).fromNow()}</p>
+                    <div className="user-details">
+                      <h2>Customer Details</h2>
+                      <div className="d-row">
+                        <div>
+                          <p className="order-info">Email: {item.UserEmail}</p>
+                          <p className="order-info">Contact: {item.contact}</p>
+                        </div>
+                      </div>
+                      <p className="order-time">{moment(item.bookedOn).fromNow()}</p>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))
-          )}
-          {!show && selectedOption === null && (
-            <li key="select-option" className="msg">
-              Please select a restaurant and branch.
-            </li>
+                </li>
+              ))
+            ) : (
+              <li key="no-data" className="msg">No orders available.</li>
+            )
           )}
         </ul>
       </div>
