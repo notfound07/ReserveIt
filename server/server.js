@@ -14,7 +14,7 @@ const userRoutes = require('./routes/userRoutes');
 app.use('/user', userRoutes);
 
 
-const PORT = 3500;
+const PORT = process.env.PORT || 3500;
 app.listen(PORT, 'localhost', async () => {
     try {
         await connectDB(); // Corrected function name
