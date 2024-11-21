@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/ReserveIt/static/css/main.2c8d4d79.css",
-    "main.js": "/ReserveIt/static/js/main.86313c79.js",
+    "main.css": "/ReserveIt/static/css/main.d36a96f0.css",
+    "main.js": "/ReserveIt/static/js/main.638753ba.js",
     "static/media/foodvideo.mp4": "/ReserveIt/static/media/foodvideo.58766767e5ff722d4a8b.mp4",
     "static/media/Sandoz.webp": "/ReserveIt/static/media/Sandoz.c30f29ebcca3c3dbee83.webp",
     "static/media/Karims.webp": "/ReserveIt/static/media/Karims.ec46a71171b0e84a9ebe.webp",
@@ -14,11 +14,11 @@
     "static/media/key_1.webp": "/ReserveIt/static/media/key_1.6eb32cab4896c30eab80.webp",
     "static/media/key_2.webp": "/ReserveIt/static/media/key_2.a3c3333f217ee36f16b8.webp",
     "index.html": "/ReserveIt/index.html",
-    "main.2c8d4d79.css.map": "/ReserveIt/static/css/main.2c8d4d79.css.map",
-    "main.86313c79.js.map": "/ReserveIt/static/js/main.86313c79.js.map"
+    "main.d36a96f0.css.map": "/ReserveIt/static/css/main.d36a96f0.css.map",
+    "main.638753ba.js.map": "/ReserveIt/static/js/main.638753ba.js.map"
   },
   "entrypoints": [
-    "static/css/main.2c8d4d79.css",
-    "static/js/main.86313c79.js"
+    "static/css/main.d36a96f0.css",
+    "static/js/main.638753ba.js"
   ]
 }
