@@ -2,7 +2,7 @@
     "name": "reserveit",
     "homepage": "https://notfound07.github.io/ReserveIt",
     "version": "0.1.0",
-    "private": true,
+    "private": false,
     "dependencies": {
         "@ashwinthomas/react-time-picker-dropdown": "^1.0.5",
         "@emotion/react": "^11.11.4",
