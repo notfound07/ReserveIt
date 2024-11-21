@@ -1,6 +1,6 @@
 {
     "name": "reserveit",
-    "homepage": "https://reserveit.systeme.io/",
+    "homepage": "https://reserveit.systeme.io",
     "version": "0.1.0",
     "private": true,
     "dependencies": {
