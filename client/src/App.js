@@ -75,8 +75,8 @@ function App() {
       value={{ otp, setOTP, setEmail, email }}>
       <div className="App">
         <NavigationMenu />
-        <Routes basename="/ReserveIt">
-          <Route path='/ReserveIt' element={<Home />} />
+        <Routes>
+          <Route path='/' element={<Home />} />
           <Route path='/Home' element={<Home />} />
           <Route path='/Booking' element={<Booking />} />
           <Route path='/Contact' element={<Contact />} />
