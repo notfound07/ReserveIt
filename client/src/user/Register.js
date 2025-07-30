@@ -15,56 +15,55 @@ function Register() {
 
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-  const [showLoginButton, setShowLoginButton] = useState(false); // Control button type
+  const [showLoginButton, setShowLoginButton] = useState(false);
   const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
 
-    // Validating the user data.
-    if (!name.value) {
+    // ✅ Validation without `.value`
+    if (!name.trim()) {
       setPopupMessage("Name is required");
-      setShowLoginButton(false); // Show close (X) button
+      setShowLoginButton(false);
       setIsPopupVisible(true);
       return;
     }
 
-    if (!email.value) {
+    if (!email.trim()) {
       setPopupMessage("Email is required");
-      setShowLoginButton(false); // Show close (X) button
+      setShowLoginButton(false);
       setIsPopupVisible(true);
       return;
     }
 
-    if (!username.value) {
+    if (!username.trim()) {
       setPopupMessage("Username is required");
-      setShowLoginButton(false); // Show close (X) button
+      setShowLoginButton(false);
       setIsPopupVisible(true);
       return;
     }
 
-    if (!password.value) {
+    if (!password.trim()) {
       setPopupMessage("Password is required");
-      setShowLoginButton(false); // Show close (X) button
+      setShowLoginButton(false);
       setIsPopupVisible(true);
       return;
     }
 
-    if (!confirmpassword.value) {
+    if (!confirmpassword.trim()) {
       setPopupMessage("Confirm password is required");
-      setShowLoginButton(false); // Show close (X) button
+      setShowLoginButton(false);
       setIsPopupVisible(true);
       return;
     }
 
-    if (password.value !== confirmpassword.value) {
-      setPopupMessage("Passwords do not match.");
-      setShowLoginButton(false); // Show close (X) button
+    if (password !== confirmpassword) {
+      setPopupMessage("Passwords do not match");
+      setShowLoginButton(false);
       setIsPopupVisible(true);
       return;
     }
 
-    // Proceed with API call for registration
     const baseURL =
       window.location.hostname === "localhost"
         ? "http://localhost:3500/user"
@@ -72,36 +71,33 @@ function Register() {
 
     try {
       const response = await axios.post(`${baseURL}/signup`, {
-        name: name.value,
-        username: username.value,
-        email: email.value,
-        password: password.value,
-        confirmpassword: confirmpassword.value,
+        name,
+        username,
+        email,
+        password,
+        confirmpassword,
       });
 
       if (response.status === 201) {
-        // User successfully created
         setPopupMessage("User created successfully! You can now login");
-        setShowLoginButton(true); // Show "Login" button
+        setShowLoginButton(true);
         setIsPopupVisible(true);
       }
     } catch (error) {
       if (error.response) {
         if (error.response.status === 409) {
-          // User already exists
           setPopupMessage("User already exists. Please login");
-          setShowLoginButton(true); // Show "Login" button
+          setShowLoginButton(true);
         } else {
-          // Other error messages
           setPopupMessage(error.response.data.message || "An error occurred during signup.");
-          setShowLoginButton(false); // Show close (X) button
+          setShowLoginButton(false);
         }
       } else if (error.request) {
         setPopupMessage("No response from the server. Please try again later.");
-        setShowLoginButton(false); // Show close (X) button
+        setShowLoginButton(false);
       } else {
         setPopupMessage(`Error: ${error.message}`);
-        setShowLoginButton(false); // Show close (X) button
+        setShowLoginButton(false);
       }
       setIsPopupVisible(true);
     }
@@ -127,7 +123,7 @@ function Register() {
   return (
     <div className='screen'>
       <div className='grid'>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
         <div className="box-image-reg">
           <Link to="/Home"><button className="round"><i className="fa-solid fa-arrow-left"></i></button></Link>
         </div>
@@ -152,16 +148,8 @@ function Register() {
                 id="password"
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? (
-                  <i className="fa-solid fa-eye-slash"></i>
-                ) : (
-                  <i className="fa-solid fa-eye"></i>
-                )}
+              <button type="button" className="toggle-password" onClick={togglePasswordVisibility}>
+                {showPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
               </button>
             </div>
 
@@ -174,16 +162,8 @@ function Register() {
                 id="confirmpassword"
                 onChange={(e) => setConfirmpassword(e.target.value)}
               />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={toggleConfirmPasswordVisibility}
-              >
-                {showConfirmPassword ? (
-                  <i className="fa-solid fa-eye-slash"></i>
-                ) : (
-                  <i className="fa-solid fa-eye"></i>
-                )}
+              <button type="button" className="toggle-password" onClick={toggleConfirmPasswordVisibility}>
+                {showConfirmPassword ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
               </button>
             </div>
 
@@ -196,7 +176,6 @@ function Register() {
         </div>
       </div>
 
-      {/* Popup for user creation or error */}
       {isPopupVisible && (
         <div className="popup-overlay">
           <div className="popup">
