@@ -22,16 +22,16 @@ const FinalItem = () => {
     generateOrderId();
   }, []);
 
-  // Retrieve local storage data
-  const UserEmail = localStorage.getItem("email");
-  const Restraunt = localStorage.getItem("restraunt");
-  const BranchName = localStorage.getItem("branch name");
-  const Seat = localStorage.getItem("seats");
-  const id = localStorage.getItem("id");
-  const item = localStorage.getItem("item");
-  const time = localStorage.getItem("time");
-  const date = localStorage.getItem("date");
-  const contact = localStorage.getItem("contact");
+  // Retrieve local storage data with explicit fallbacks
+  const UserEmail = localStorage.getItem("email") || "";
+  const Restraunt = localStorage.getItem("restraunt") || "";
+  const BranchName = localStorage.getItem("branch name") || "";
+  const Seat = localStorage.getItem("seats") || "";
+  const id = localStorage.getItem("id") || "";
+  const item = localStorage.getItem("item") || "";
+  const time = localStorage.getItem("time") || "";
+  const date = localStorage.getItem("date") || "";
+  const contact = localStorage.getItem("contact") || "";
 
   const baseURL =
     window.location.hostname === "localhost"
@@ -41,8 +41,28 @@ const FinalItem = () => {
   const submit = async (e) => {
     e.preventDefault();
 
+    // FE validation before submission
+    if (!OrderId || !Restraunt || !BranchName || !UserEmail || !Seat || !id || !item || !time || !date || !contact) {
+      alert("All booking fields must be filled. Please try again.");
+      return;
+    }
+
     if (checkboxChecked && checkboxTwoChecked && checkboxThreeChecked) {
       setIsLoading(true);
+
+      // Log data before sending
+      console.log({
+        OrderId,
+        Restraunt,
+        BranchName,
+        UserEmail,
+        Seat,
+        id,
+        item,
+        time,
+        date,
+        contact
+      });
 
       try {
         const response = await axios.post(`${baseURL}/booking`, {
@@ -67,8 +87,9 @@ const FinalItem = () => {
           navigate(`/Done`);
         }
       } catch (error) {
-        console.error("Error in Submission", error);
-        alert("An error occurred while submitting the booking. Please try again.");
+        // improved error logging
+        console.error("Error in Submission", error.response?.data || error.message);
+        alert("An error occurred while submitting the booking: " + (error.response?.data?.message || error.message));
       } finally {
         setIsLoading(false);
         // Clear local storage after submission

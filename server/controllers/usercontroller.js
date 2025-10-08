@@ -9,8 +9,8 @@ const pdf = require('html-pdf');
 
 // Function to send ticket email
 const sendTicketEmail = async (userEmail, ticket) => {
-  try {
-    const htmlContent = `<!DOCTYPE html>
+    try {
+        const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -31,37 +31,37 @@ const sendTicketEmail = async (userEmail, ticket) => {
 </body>
 </html>`;
 
-    const pdfBuffer = await new Promise((resolve, reject) => {
-      pdf.create(htmlContent).toBuffer((err, buffer) => {
-        if (err) return reject(err);
-        resolve(buffer);
-      });
-    });
+        const pdfBuffer = await new Promise((resolve, reject) => {
+            pdf.create(htmlContent).toBuffer((err, buffer) => {
+                if (err) return reject(err);
+                resolve(buffer);
+            });
+        });
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.MY_EMAIL,
-        pass: process.env.MY_PASSWORD,
-      }
-    });
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.MY_EMAIL,
+                pass: process.env.MY_PASSWORD,
+            }
+        });
 
-    const mailOptions = {
-      from: process.env.MY_EMAIL,
-      to: userEmail,
-      subject: 'ReserveIt Booking',
-      html: 'Please find your booking details attached.',
-      attachments: [{ filename: 'booking.pdf', content: pdfBuffer }]
-    };
+        const mailOptions = {
+            from: process.env.MY_EMAIL,
+            to: userEmail,
+            subject: 'ReserveIt Booking',
+            html: 'Please find your booking details attached.',
+            attachments: [{ filename: 'booking.pdf', content: pdfBuffer }]
+        };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent: ' + info.response);
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent: ' + info.response);
 
-    return { message: 'Ticket email sent successfully' };
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw new Error('Failed to send email');
-  }
+        return { message: 'Ticket email sent successfully' };
+    } catch (error) {
+        console.error('Error sending email:', error);
+        throw new Error('Failed to send email');
+    }
 };
 
 const sendEmail = async ({ recipient_email, OTP }) => {
@@ -309,49 +309,75 @@ const Allfeedbacks = async (req, res) => {
 
 // Function to handle booking
 const booking = async (req, res) => {
-    try {
-        const { OrderId, Restraunt, BranchName, UserEmail, Seat, id, item, time, date, contact } = req.body;
+  try {
+    // Log data to check request body
+    console.log("Received booking POST:", req.body);
 
-        // Validating the user data.
-        if (!OrderId || !Restraunt || !BranchName || !UserEmail || !Seat || !id || !item || !time || !date || !contact) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
+    const {
+      OrderId,
+      Restraunt,
+      BranchName,
+      UserEmail,
+      Seat,
+      id,
+      item,
+      time,
+      date,
+      contact
+    } = req.body;
 
-        const newReservation = await Submission.create({
-            OrderId,
-            Restraunt,
-            BranchName,
-            UserEmail,
-            Seat,
-            id,
-            item,
-            time,
-            date,
-            contact,
-        });
-
-        if (newReservation) {
-            // Create the ticket object
-            const ticket = {
-                Restraunt: newReservation.Restraunt,
-                BranchName: newReservation.BranchName,
-                Seat: newReservation.Seat,
-                item: newReservation.item,
-                time: newReservation.time,
-                date: newReservation.date,
-                contact: newReservation.contact
-            };
-
-            // Send email with ticket details
-            await sendTicketEmail(UserEmail, ticket); 
-
-            return res.status(201).json(newReservation);
-        }
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({ message: 'Internal server error' });
+    // Validating the user data.
+    if (
+      !OrderId ||
+      !Restraunt ||
+      !BranchName ||
+      !UserEmail ||
+      !Seat ||
+      !id ||
+      !item ||
+      !time ||
+      !date ||
+      !contact
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
     }
+
+    const newReservation = await Submission.create({
+      OrderId,
+      Restraunt,
+      BranchName,
+      UserEmail,
+      Seat,
+      id,
+      item,
+      time,
+      date,
+      contact,
+    });
+
+    if (newReservation) {
+      // Create the ticket object
+      const ticket = {
+        Restraunt: newReservation.Restraunt,
+        BranchName: newReservation.BranchName,
+        Seat: newReservation.Seat,
+        item: newReservation.item,
+        time: newReservation.time,
+        date: newReservation.date,
+        contact: newReservation.contact,
+      };
+
+      // Send email with ticket details
+      await sendTicketEmail(UserEmail, ticket);
+
+      return res.status(201).json(newReservation);
+    }
+  } catch (err) {
+    console.error("Error in booking API:", err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };
+
 
 // Function to retrieve all records
 const Allrecords = async (req, res) => {
